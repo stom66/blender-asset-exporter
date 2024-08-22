@@ -14,6 +14,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # Fetch all history for proper tag handling
 
     - name: Generate Changelog
       uses: smichard/conventional_changelog@2.0.0
@@ -29,8 +31,7 @@ jobs:
       run: |
         git add CHANGELOG.md
         git commit -m "docs: :robot: changelog file generated" || echo "No changes to commit"
-        git fetch origin
-        git rebase origin/main
+        git pull --rebase origin main
         git push origin HEAD:main
 
     - name: Create Release Archive

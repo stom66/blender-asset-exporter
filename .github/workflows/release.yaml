@@ -23,10 +23,10 @@ jobs:
 
     - name: Create Release Archive
       run: |
-        mkdir -p release_temp/blender-asset-exporter
-        cp CHANGELOG.md COPYING README.md blender_manifest.toml *.py release_temp/blender-asset-exporter/
-        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" release_temp/blender-asset-exporter
-        rm -rf release_temp
+        mkdir -p blender-asset-exporter
+        cp CHANGELOG.md COPYING README.md blender_manifest.toml *.py blender-asset-exporter/
+        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" blender-asset-exporter
+        rm -rf blender-asset-exporter
 
     - name: Read Changelog Contents
       id: read_changelog

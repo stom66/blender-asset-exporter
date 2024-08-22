@@ -37,7 +37,7 @@ jobs:
       run: |
         mkdir -p release_temp/blender-asset-exporter
         cp CHANGELOG.md COPYING README.md blender_manifest.toml *.py release_temp/blender-asset-exporter/
-        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" release_temp
+        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" release_temp/blender-asset-exporter
         rm -rf release_temp
 
     - name: Read Changelog Contents

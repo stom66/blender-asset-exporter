@@ -29,6 +29,8 @@ jobs:
       run: |
         git add CHANGELOG.md
         git commit -m "docs: :robot: changelog file generated" || echo "No changes to commit"
+        git fetch origin
+        git rebase origin/main
         git push origin HEAD:main
 
     - name: Create Release Archive

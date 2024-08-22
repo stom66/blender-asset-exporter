@@ -4,6 +4,7 @@ on:
   push:
     tags:
     - '*'
+  workflow_dispatch:
 
 jobs:
   create-release:
@@ -14,8 +15,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0  # Fetch all history for proper tag handling
 
     - name: Generate Changelog
       uses: smichard/conventional_changelog@2.0.0

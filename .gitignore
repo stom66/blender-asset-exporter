@@ -1,0 +1,4 @@
+*.blend[0-9]
+/export/*
+
+/__pycache__

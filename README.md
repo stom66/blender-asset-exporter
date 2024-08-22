@@ -3,7 +3,7 @@
 ### A Blender 4.1+ addon for quickly exporting collections to glTF and FBX
 
 
-This addon was written to speed up exporting assets for use with various pipelines. It started as a way to quickly export glTF asset for Decentrlaand. It has since been adapted to support FBX as well.
+This addon was written to speed up exporting assets for use with various pipelines. It started as a way to quickly export glTF asset for Decentraland. It has since been adapted to support FBX, with some features for Roblox development.
 
 
 ### Features

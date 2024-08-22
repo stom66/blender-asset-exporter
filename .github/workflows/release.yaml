@@ -15,6 +15,22 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Generate Changelog
+      uses: smichard/conventional_changelog@2.0.0
+      with:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set Git User Info
+      run: |
+        git config user.name 'GitHub Actions Bot'
+        git config user.email 'actions@github.com'
+
+    - name: Commit Changelog
+      run: |
+        git add CHANGELOG.md
+        git commit -m "docs: :robot: changelog file generated" || echo "No changes to commit"
+        git push
+
     - name: Create Release Archive
       run: |
         zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" \
@@ -25,3 +41,7 @@ jobs:
       with:
         artifacts: "blender-asset-exporter-${{ github.ref_name }}.zip"
         token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
+        body: |
+          $(cat CHANGELOG.md)

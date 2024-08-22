@@ -1,6 +1,5 @@
-*.blend[0-9]
+/__pycache__
 /assets/test-export/*
 
-/__pycache__
-
+*.blend[0-9]
 *.afdesign~lock~

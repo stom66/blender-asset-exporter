@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: write-all
 
     steps:
     - uses: actions/checkout@v3
@@ -33,8 +33,17 @@ jobs:
 
     - name: Create Release Archive
       run: |
-        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" \
-            COPYING README.md blender_manifest.toml *.py
+        mkdir -p release_temp/blender-asset-exporter
+        cp CHANGELOG.md COPYING README.md blender_manifest.toml *.py release_temp/blender-asset-exporter/
+        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" release_temp
+        rm -rf release_temp
+
+    - name: Read Changelog Contents
+      id: read_changelog
+      run: |
+        echo "CHANGELOG_BODY<<EOF" >> $GITHUB_ENV
+        cat CHANGELOG.md >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     - name: Upload Release
       uses: ncipollo/release-action@v1.12.0
@@ -43,5 +52,4 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
         name: ${{ github.ref_name }}
-        body: |
-          $(cat CHANGELOG.md)
+        body: ${{ env.CHANGELOG_BODY }}

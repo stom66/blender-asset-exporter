@@ -37,14 +37,14 @@ class VIEW3D_PT_AssetExporter_UI_FBX(bpy.types.Panel):
         
 		# Dropdown: FBX Presets
 		row = layout.row()
-		row.label(text="FBX Preset")
+		row.label(text="FBX export preset")
 		row.prop(context.scene.ae_settings, "fbx_preset", text="")
 
 		# Checkbox: FBX: split NLA tracks
 		row = layout.row()
 		col = row.column(align=False)
-		col.label(text="FBX: split NLA tracks")
-		col = row.column(align=True)
+		col.label(text="Split NLA tracks")
+		col = row.column(align=True) 
 		col.prop(context.scene.ae_settings, "fbx_split_nla", text="")
 
 		# Btn: Export FBX
@@ -75,7 +75,7 @@ class VIEW3D_PT_AssetExporter_UI_GLTF(bpy.types.Panel):
 		col.label(text="Export format")
 		col = row.column(align=True)
 		col.prop(context.scene.ae_settings, "gltf_export_format", text="")
-        
+
 		# Checkbox: glTF: use Draco
 		row = layout.row()
 		col = row.column(align=False)

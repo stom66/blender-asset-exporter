@@ -21,8 +21,10 @@ jobs:
     - name: Create Release Archive
       run: |
         mkdir -p release_temp/blender-asset-exporter
+        cp COPYING release_temp/blender-asset-exporter/
         cp *.md release_temp/blender-asset-exporter/
         cp *.py release_temp/blender-asset-exporter/
+        cp *.toml release_temp/blender-asset-exporter/
         cd release_temp
         zip -r "../blender-asset-exporter-${{ env.TAG }}.zip" blender-asset-exporter
         cd ..

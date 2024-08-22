@@ -2,3 +2,5 @@
 /export/*
 
 /__pycache__
+
+*.afdesign~lock~

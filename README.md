@@ -9,7 +9,7 @@ This addon was written to speed up exporting assets for use with various pipelin
 ### Features
 
 - Export to either glTF or FBX
-- Choose from existing Export Presets
+- Choose from existing Export Operator Presets
 - Export multiple collections at once
 - Export NLA tracks to individual files (for use with Roblox)
 
@@ -65,9 +65,9 @@ You may click Cancel and return to the Viewport, the profile will have been save
 
 ### Updating export operator presets
 
-* Select the Preset from the dropdown of Operator presets
+* Select the Preset from the dropdown of Operator Presets
 * Change the settings you wish to change
-* At the top-right, next to the "Operator presets" dropdown, click the + icon
+* At the top-right, next to the "Operator Presets" dropdown, click the + icon
 * Enter the current preset name
 * Click OK to save and overwrite the old Preset
 

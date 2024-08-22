@@ -6,33 +6,22 @@ on:
     - '*'
 
 jobs:
-  build:
+  create-release:
     runs-on: ubuntu-latest
 
-    permissions: write-all
-    
-    steps:
-    - uses: actions/checkout@master
+    permissions:
+      contents: write
 
-    - name: Get Tag
-      id: tag
-      run: echo "TAG=$(basename ${{ github.ref }})" >> $GITHUB_ENV
+    steps:
+    - uses: actions/checkout@v3
 
     - name: Create Release Archive
       run: |
-        mkdir -p release_temp/blender-asset-exporter
-        cp COPYING release_temp/blender-asset-exporter/
-        cp *.md release_temp/blender-asset-exporter/
-        cp *.py release_temp/blender-asset-exporter/
-        cp *.toml release_temp/blender-asset-exporter/
-        cd release_temp
-        zip -r "../blender-asset-exporter-${{ env.TAG }}.zip" blender-asset-exporter
-        cd ..
-        rm -rf release_temp
-      shell: bash
+        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" \
+            COPYING README.md blender_manifest.toml *.py
 
     - name: Upload Release
       uses: ncipollo/release-action@v1.12.0
       with:
-        artifacts: "blender-asset-exporter-${{ env.TAG }}.zip"
+        artifacts: "blender-asset-exporter-${{ github.ref_name }}.zip"
         token: ${{ secrets.GITHUB_TOKEN }}

@@ -118,7 +118,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
  		# Check if there are any collections to export
 		if len(collectionsToExport) < 1:
 			Log("No collections found to export")
-			settings.export_status = "No collections found to export"
+			self.report({'ERROR'}, "No collections found to export")
 			return {'CANCELLED'}	
 
 		# Initialize export settings
@@ -147,9 +147,11 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 				Log("Finished building export settings")
 
 			else:
+				self.report({'ERROR'}, f"Preset file not found: {preset_file_path}")
 				Log(f"Preset file not found: {preset_file_path}")
 				return {'CANCELLED'}
 		else:
+			self.report({'ERROR'}, "No export preset was selected")
 			Log("No export preset was selected")
 			return {'CANCELLED'}
 
@@ -158,7 +160,9 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		export_settings["use_active_collection"] = True
 
 		# Export all the collections
+		files = 0
 		for name, col in collectionsToExport.items():
+
 			
             # If we are splitting NLA tracks, eg exporting a single file per NLA track, then we need to loop through and check for amratures:
 			if settings.fbx_split_nla:
@@ -172,6 +176,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 
 							Log(f"Exporting NLA Track: {track.name} for armature: {obj.name}")
 							self.ExportSingleNLATrackToFBX(col, obj, track, export_settings)
+							files += 1
 
 			# Then we carry on and also export a copy of the model
 			
@@ -183,5 +188,12 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 			
             # Run the export
 			self.ExportCollectionToFBX(col, export_settings)
+			files += 1
+
+			info_msg = f"Exported {len(collectionsToExport)} collections"
+			if settings.fbx_split_nla:
+				info_msg = info_msg + f" to {files} files"
+
+		self.report({'INFO'}, info_msg)
 
 		return {'FINISHED'}

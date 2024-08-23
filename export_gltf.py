@@ -90,6 +90,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
  		# Check if there are any collections to export
 		if len(collectionsToExport) < 1:
 			Log("No collections found to export")
+			self.report({'ERROR'}, "No collections found to export")
 			settings.export_status = "No collections found to export"
 			return {'CANCELLED'}	
 
@@ -121,8 +122,10 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 
 			else:
 				Log(f"Preset file not found: {preset_file_path}")
+				self.report({'ERROR'}, f"Preset file not found: {preset_file_path}")
 				return {'CANCELLED'}
 		else:
+			self.report({'ERROR'}, "No export preset was selected")
 			Log("No export preset was selected")
 			return {'CANCELLED'}
 
@@ -153,4 +156,5 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 			Log("Exporting as " + name + " to path: " + file_path)
 			self.ExportCollectionToGLtf(col, export_settings, settings.gltf_ignore_transform)
 
+		self.report({'INFO'}, f"Exported {len(collectionsToExport)} collections")
 		return {'FINISHED'}

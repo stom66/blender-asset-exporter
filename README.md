@@ -3,12 +3,14 @@
 ### A Blender 4.1+ addon for quickly exporting collections to glTF and FBX
 
 
-This addon was written to speed up exporting assets for use with various pipelines. It started as a way to quickly export glTF asset for Decentraland. It has since been adapted to support FBX, with some features for Roblox development.
+This addon was written to speed up exporting assets for use with various pipelines. It allows you to export multiple assets at once with a single click, by grouping them into collections.
+
+ It started as a way to quickly export glTF asset for Decentraland. It has since been adapted to support FBX, with some features for Roblox development.
 
 
 ### Features
 
-- Export to either glTF or FBX
+- One-click, batch export to either glTF or FBX
 - Choose from existing Export Operator Presets
 - Export multiple collections at once
 - Export NLA tracks to individual files (for use with Roblox)
@@ -29,7 +31,7 @@ How to use:
 --
 
 * Place your objects in a collection 
-* Name the collection, using the prefix specified in the Asset Exporter panel. Examples:
+* Name the collection, using the prefix specified in the Asset Exporter panel. For example, with the Collection Prefix set to the default value of "_export.":
     * `_export.robotArm`
     * `_export.rock.small`
     * `_export.rock.large`
@@ -49,18 +51,22 @@ How to use:
     * Click `Export to glTF`
 
 
-
 ## Creating export operator presets
 
 * File -> Export -> glTF 2.0 (.glb/.gltf)  
     **OR**    
 * File -> Export -> FBX (.fbx)
-* Choose the export settings you would like to use
+* Configure the export settings you would like to use
 * At the top-right, next to the "Operator Presets" dropdown, click the + icon
 * Enter a name for your Preset
 * Click OK
 
 You may click Cancel and return to the Viewport, the profile will have been saved and can now be selected in the Asset Exporter panel.
+
+Notes: 
+
+- The "Use Selection", "Use Visible" and other filtering settings are ignored - these are over-ridden by the plugin to "Use Collection", as this is how the exporter works.
+- For glTF, Draco compression settings are over-ridden by the toggle in the Asset Exporter panel
 
 
 ### Updating export operator presets

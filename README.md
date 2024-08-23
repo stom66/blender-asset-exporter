@@ -104,6 +104,20 @@ For example, a collection named `_export.robotArm` containing an Armature with 3
 - `robotArm.thumbsUp.fbx` - just the armature and the `thumbsUp` NLA track
 
 
+## Troubleshooting
+
+- #### Nothing happens when you export
+
+    Ensure you have a valid Export Operator Preset selected in the dropdown.
+
+    I'll add a warning for this at some point.
+
+- #### You get an error when trying to export
+
+    This is usually caused by trying to export with an old Export Operator Preset. Make a new one and be sure to Load Operator Defaults first so that none of the old settings carry over.
+
+    
+
 ## ToDo
 
 - [ ] Add in option to move objects to world origin during export

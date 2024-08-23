@@ -79,6 +79,13 @@ class VIEW3D_PT_AssetExporter_UI_GLTF(bpy.types.Panel):
 		# Checkbox: glTF: use Draco
 		row = layout.row()
 		col = row.column(align=False)
+		col.label(text="Ignore root transforms")
+		col = row.column(align=True)
+		col.prop(context.scene.ae_settings, "gltf_ignore_transform", text="")
+
+		# Checkbox: glTF: use Draco
+		row = layout.row()
+		col = row.column(align=False)
 		col.label(text="Use Draco compression")
 		col = row.column(align=True)
 		col.prop(context.scene.ae_settings, "gltf_use_draco", text="")

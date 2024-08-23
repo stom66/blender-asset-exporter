@@ -94,6 +94,13 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 		default     = False,
 	) # type: ignore
 
+	# Toggle: Ignore root transform
+	gltf_ignore_transform: bpy.props.BoolProperty(
+		name        = "Ignore root transform",
+		description = "If enabled, objects in the root of the collection will be moved back to 0,0,0 for the export. This is used to similar effect as the FBX option 'Apply transform'.",
+		default     = False,
+	) # type: ignore
+
 	# Dropdown: File format: gltf or glb
 	gltf_export_format: bpy.props.EnumProperty(
 		name        = "glTF Export format",

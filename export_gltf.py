@@ -25,7 +25,8 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 	def ExportCollectionToGLtf(
 		self,
 		collection     : bpy.types.Collection, 
-		export_settings: dict
+		export_settings: dict,
+		ignore_transforms: bool
 	) -> None:
 		"""
 		Export the specified collection to a GLTF file with the given export_settings.
@@ -33,6 +34,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		Args:
 		- collection (bpy.types.Collection): The Blender collection containing objects to export.
 		- export_settings (dict): The table containting all the export settings
+		- ignore_transforms (bool): Should objects in the root of the collection will be moved back to 0,0,0 for the export 
 
 		Returns:
 		- None
@@ -44,8 +46,35 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		# Deselect all the objects
 		bpy.ops.object.select_all(action='DESELECT')
 
+		# Save transforms
+		orig_transforms = {}
+		if ignore_transforms:
+			for obj in bpy.data.collections.get(collection.name).objects:
+				if obj.parent is None:
+					print("Ignoring transform for ", obj.name)
+
+					orig_transforms[obj] = {
+						'location'      : obj.location.copy(),
+						'rotation_euler': obj.rotation_euler.copy(),
+						'scale'         : obj.scale.copy()
+					}
+					
+					obj.location       = (0, 0, 0)
+					obj.rotation_euler = (0, 0, 0)
+					obj.scale          = (1, 1, 1)
+
+
 		# Export using the custom exporter
 		bpy.ops.export_scene.gltf(**export_settings)
+
+		# Restore transformations
+		if ignore_transforms:			
+			for obj, transform in orig_transforms.items():
+				obj.location       = transform['location']
+				obj.rotation_euler = transform['rotation_euler']
+				obj.scale          = transform['scale']
+
+
 		
 	def execute(self, context):
 
@@ -113,7 +142,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		export_settings["use_visible"]                          = False
 
 
-		# Loop through all collections in the current view layer
+		# Loop through all collections to export
 		for name, col in collectionsToExport.items():
 			
 			# Set the export file name to match the collection name (minus the MATCH_STRING)
@@ -122,6 +151,6 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 
 			# Run the export
 			Log("Exporting as " + name + " to path: " + file_path)
-			self.ExportCollectionToGLtf(col, export_settings)
+			self.ExportCollectionToGLtf(col, export_settings, settings.gltf_ignore_transform)
 
 		return {'FINISHED'}

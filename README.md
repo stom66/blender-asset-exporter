@@ -17,11 +17,11 @@ This addon was written to speed up exporting assets for use with various pipelin
 
 ## Getting started
 
-- Download the latest version from the Releases page
+- Download the [latest version from the Releases page](releases/latest)
 - Install it in Blender Preferences -> Add-ons -> Menu -> Install from disk
 - Once installed ensure the plugin is activated (ticked) in the list of Addons
 
-The plugin panel can be found in 3D Viewport -> Sidebar -> Asset Exporter
+The plugin panel can be found in *3D Viewport -> Sidebar -> Asset Exporter*
 
 
 ![blender ui panel location](./assets/blender-ui-location.png)
@@ -120,6 +120,6 @@ For example, a collection named `_export.robotArm` containing an Armature with 3
 
 ## ToDo
 
-- [ ] Add in option to move objects to world origin during export
-- [ ] Better status indicators  
+- [x] Add in option to move objects to world origin during export
+- [x] Better status indicators  
 - [ ] Add ability to export JSON file to accompany split FBX files, for use with Lune and other Roblox toolchain scripts.

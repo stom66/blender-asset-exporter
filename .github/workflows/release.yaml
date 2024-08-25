@@ -16,11 +16,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Generate Changelog
-      uses: smichard/conventional_changelog@2.0.0
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        args: --release-count 1
+        node-version: '16'
+
+    - name: Install conventional-changelog-cli
+      run: npm install -g conventional-changelog-cli
+
+    - name: Generate Changelog
+      run: conventional-changelog -p angular -i CHANGELOG.md -s --release-count 1
 
     - name: Create Release Archive
       run: |

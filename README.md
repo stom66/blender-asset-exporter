@@ -17,7 +17,7 @@ This addon was written to speed up exporting assets for use with various pipelin
 
 ## Getting started
 
-- Download the [latest version from the Releases page](releases/latest)
+- Download the [latest version from the Releases page](https://github.com/stom66/blender-asset-exporter/releases/latest)
 - Install it in Blender Preferences -> Add-ons -> Menu -> Install from disk
 - Once installed ensure the plugin is activated (ticked) in the list of Addons
 

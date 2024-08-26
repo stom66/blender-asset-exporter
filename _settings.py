@@ -101,6 +101,13 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 		default     = False,
 	) # type: ignore
 
+	# Toggle: Ignore root transform
+	gltf_remove_modifier_smooth_by_angle: bpy.props.BoolProperty(
+		name        = "Remove \"Smooth by Angle\" modifier",
+		description = "Remove these modifiers on export as they currently cause problems with the glTF exporter",
+		default     = True,
+	) # type: ignore
+
 	# Dropdown: File format: gltf or glb
 	gltf_export_format: bpy.props.EnumProperty(
 		name        = "glTF Export format",

@@ -18,7 +18,7 @@ bl_info = {
 	"name"       : "Asset Exporter",
 	"description": "Quickly export multiple Collections to glTF or FBX",
 	"author"     : "Tom Steventon - stom66",
-	"version"    : (0, 1, 3),
+	"version"    : (0, 2, 0),
 	"blender"    : (4, 1, 0),
 	"location"   : "3D Viewport -> Sidebar -> Asset Exporter",
 	"category"   : "Import-Export",
@@ -50,8 +50,6 @@ def register():
 	bpy.utils.register_class(VIEW3D_PT_AssetExporter_UI_FBX)
 	bpy.utils.register_class(VIEW3D_PT_AssetExporter_UI_GLTF)
 
-
-	
 
 def unregister():
 	# Unregister various UI component classes

@@ -83,6 +83,13 @@ class VIEW3D_PT_AssetExporter_UI_GLTF(bpy.types.Panel):
 		col = row.column(align=True)
 		col.prop(context.scene.ae_settings, "gltf_ignore_transform", text="")
 
+		# Checkbox: glTF: remove "Smooth by Angle"
+		row = layout.row()
+		col = row.column(align=False)
+		col.label(text="Remove \"Smooth by Angle\" modifiers")
+		col = row.column(align=True)
+		col.prop(context.scene.ae_settings, "gltf_remove_modifier_smooth_by_angle", text="")
+
 		# Checkbox: glTF: use Draco
 		row = layout.row()
 		col = row.column(align=False)

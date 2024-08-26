@@ -40,6 +40,9 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		- None
 		"""
 
+		# Get settings
+		settings = bpy.context.scene.ae_settings
+
 		# Set the collection as the active collection
 		bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection.children[collection.name]
 
@@ -63,6 +66,10 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 					obj.rotation_euler = (0, 0, 0)
 					obj.scale          = (1, 1, 1)
 
+		# Remove the "Smooth by Angle" modifiers if enabled
+		if settings.gltf_remove_modifier_smooth_by_angle:
+			for obj in bpy.data.collections.get(collection.name).objects:
+				self.disable_smooth_by_angle_modifier(obj)
 
 		# Export using the custom exporter
 		bpy.ops.export_scene.gltf(**export_settings)
@@ -74,6 +81,11 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 				obj.rotation_euler = transform['rotation_euler']
 				obj.scale          = transform['scale']
 
+	def disable_smooth_by_angle_modifier(self, obj):
+		for mod in obj.modifiers:
+			if mod.name == '!!Smooth by Angle' or mod.name == "Smooth by Angle":
+				Log(f"Disabling '!!Smooth by Angle' modifier for object: {obj.name}")
+				obj.modifiers.remove(mod)
 
 		
 	def execute(self, context):

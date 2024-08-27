@@ -20,6 +20,14 @@ Developed using the following VSCode Extensions:
 
 The GitHub repository is configured with a workflow action to create a release zip upon pushing a new tag.
 
+* make commits
+* bump version in both `blender_manifest.toml` and `__init_.py`
+* create tag: `git tag 1.0.0`
+* `git push`
+* push tags `git push origin 1.0.0`
+
+
+
 ```sh
 # Create and push a tag:
 git tag 1.0.0

@@ -167,6 +167,16 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		for name, col in collectionsToExport.items():
 
 			
+			# Set the export file name to match the collection name (minus the MATCH_STRING)
+			file_path = str((path + '/' + name + '.fbx'))
+			export_settings["filepath"] = file_path
+
+			
+            # Run the export
+			Log("Exporting as " + name + " to path: " + file_path)
+			self.ExportCollectionToFBX(col, export_settings)
+			files += 1
+			
             # If we are splitting NLA tracks, eg exporting a single file per NLA track, then we need to loop through and check for amratures:
 			if settings.fbx_split_nla:
 				# Check for armatures with NLA tracks
@@ -181,18 +191,8 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 							self.ExportSingleNLATrackToFBX(col, obj, track, export_settings)
 							files += 1
 
-			# Then we carry on and also export a copy of the model
-			
-			# Set the export file name to match the collection name (minus the MATCH_STRING)
-			file_path = str((path + '/' + name + '.fbx'))
-			export_settings["filepath"] = file_path
 
-			Log("Exporting as " + name + " to path: " + file_path)
-			
-            # Run the export
-			self.ExportCollectionToFBX(col, export_settings)
-			files += 1
-
+			# Build the return info message
 			info_msg = f"Exported {len(collectionsToExport)} collections"
 			if settings.fbx_split_nla:
 				info_msg = info_msg + f" to {files} files"

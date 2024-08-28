@@ -37,8 +37,9 @@ jobs:
     - name: Read Changelog Contents
       id: read_changelog
       run: |
-        echo "CHANGELOG_BODY<<EOF" >> $GITHUB_ENV
-        cat CHANGELOG.md >> $GITHUB_ENV
+        CHANGELOG_BODY=$(cat CHANGELOG.md)
+        echo "changelog_body<<EOF" >> $GITHUB_ENV
+        echo "$CHANGELOG_BODY" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
 
     - name: Upload Release

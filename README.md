@@ -51,7 +51,13 @@ How to use:
     * Click `Export to glTF`
 
 
-## Creating export operator presets
+## Export Operator Presets
+
+"Operator Presets" are a way of saving export settings so that they can easily be re-used. Blender supports this by default, and the Asset Exporter Addon requires there to be at least one Export Operator Preset that it can use for exports.
+
+If your
+
+### Creating an Operator Preset
 
 * File -> Export -> glTF 2.0 (.glb/.gltf)  
     **OR**    
@@ -61,6 +67,8 @@ How to use:
 * Enter a name for your Preset
 * Click OK
 
+![Create Operator preset](./assets/blender-operator-preset-create-location.png)
+
 You may click Cancel and return to the Viewport, the profile will have been saved and can now be selected in the Asset Exporter panel.
 
 Notes: 
@@ -69,7 +77,7 @@ Notes:
 - For glTF, Draco compression settings are over-ridden by the toggle in the Asset Exporter panel
 
 
-### Updating export operator presets
+### Updating an Operator Presets
 
 * Select the Preset from the dropdown of Operator Presets
 * Change the settings you wish to change
@@ -108,13 +116,23 @@ For example, a collection named `_export.robotArm` containing an Armature with 3
 
 - #### Nothing happens when you export
 
-    Ensure you have a valid Export Operator Preset selected in the dropdown.
-
-    I'll add a warning for this at some point.
+    Look at the status bar for more info. Common mistakes to check:
+    
+    - Ensure you have a valid Export Operator Preset selected in the dropdown.
+    - Ensure you have a collection with the correct prefix
+    - Ensure you have select a valid output path
 
 - #### You get an error when trying to export
 
     This is usually caused by trying to export with an old Export Operator Preset. Make a new one and be sure to Load Operator Defaults first so that none of the old settings carry over.
+
+- #### Exporting to glTF with the export option "Apply Modifiers" triggers a warning "Cannot assign a 'IDPropertyGroup' value to the existing 'hops' Group IDProperty"
+
+    This seems to be a bug with the current version of HardOps/HOps. You can fix this by removing the Smooth by Angle modifier from your asset, or enabling the option to remove them automatically in the Asset Exporter options.
+
+- #### You get an error ending with "context is incorrect"
+
+This is usually due to trying to export when in an armatures Pose mode. Switch to object mode before exporting.
 
     
 

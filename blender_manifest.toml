@@ -3,7 +3,7 @@ schema_version = "1.0.0"
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
 id = "asset_exporter"
-version = "0.2.2"
+version = "0.2.3"
 name = "Asset Exporter"
 tagline = "Quickly export multiple Collections to glTF or FBX"
 maintainer = "@stom66 - GitHub"

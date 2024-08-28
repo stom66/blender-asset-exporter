@@ -4,14 +4,15 @@ import json
 from xml.etree.ElementTree import tostring
 
 from . collections import FindCollectionsWithPrefix
-from . export_utils import GetExportPath
 from . logging import Log
+from . util import *
 
 
 class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 	bl_idname  = "ae.export_gltf"
 	bl_label   = "Export Collections to glTF"
 	bl_options = {'REGISTER', 'UNDO'}
+	bl_description = "Exports matching collections to glTF files"
 
 
 
@@ -22,7 +23,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 	# ███████╗██╔╝ ██╗██║     ╚██████╔╝██║  ██║   ██║   ███████╗██║  ██║
 	# ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 	#
-	def ExportCollectionToGLtf(
+	def export_collection_gltf(
 		self,
 		collection     : bpy.types.Collection, 
 		export_settings: dict,
@@ -69,7 +70,13 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		# Remove the "Smooth by Angle" modifiers if enabled
 		if settings.gltf_remove_modifier_smooth_by_angle:
 			for obj in bpy.data.collections.get(collection.name).objects:
-				self.disable_smooth_by_angle_modifier(obj)
+				disable_smooth_by_angle_modifier(obj)
+
+		# Remove custom properties
+		if settings.gltf_clean_custom_props:
+			for obj in bpy.data.collections.get(collection.name).objects:
+				if obj.type == 'MESH':
+					clean_custom_properties(obj)
 
 		# Export using the custom exporter
 		bpy.ops.export_scene.gltf(**export_settings)
@@ -81,12 +88,6 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 				obj.rotation_euler = transform['rotation_euler']
 				obj.scale          = transform['scale']
 
-	def disable_smooth_by_angle_modifier(self, obj):
-		for mod in obj.modifiers:
-			if mod.name == '!!Smooth by Angle' or mod.name == "Smooth by Angle":
-				Log(f"Disabling '!!Smooth by Angle' modifier for object: {obj.name}")
-				obj.modifiers.remove(mod)
-
 		
 	def execute(self, context):
 
@@ -94,7 +95,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		settings = bpy.context.scene.ae_settings
 
         # Get output path:
-		path = GetExportPath()
+		path = get_export_path()
 
 		# Get a dict of the collections to export with their name as the key
 		collectionsToExport = FindCollectionsWithPrefix(settings.export_prefix)
@@ -110,43 +111,21 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		export_settings = {}
 
 		# Read in export settings from selected preset
-		if settings.gltf_preset != 'NONE':
-			preset_file_path = os.path.join(bpy.utils.preset_paths('operator/export_scene.gltf/')[0], settings.gltf_preset.replace(" ", "_") + ".py")
-			if os.path.exists(preset_file_path):
-
-				# Create a dummy containter class to hold the settings in
-				class Container(object):
-					__slots__ = ('__dict__',)
-
-				op = Container()
-				file = open(preset_file_path, 'r')
-
-				# storing the values from the preset on the class
-				for line in file.readlines()[3::]:
-					exec(line, globals(), locals())
-
-				# pass class dictionary to the operator				
-				for key in op.__dict__:
-					if key.startswith("export_") or key.startswith("use_"):
-						export_settings[key] = op.__dict__[key]
-				
-				Log("Finished building export settings")
-
-			else:
-				Log(f"Preset file not found: {preset_file_path}")
-				self.report({'ERROR'}, f"Preset file not found: {preset_file_path}")
+		if settings.fbx_preset != 'NONE':
+			export_settings = read_export_operator_preset(settings.gltf_preset, "gltf")
+			if not export_settings:
+				self.report({'ERROR'}, f"Preset file not found: {settings.gltf_preset}")
+				Log(f"Preset file not found: {settings.gltf_preset}")
 				return {'CANCELLED'}
+
 		else:
 			self.report({'ERROR'}, "No export preset was selected")
 			Log("No export preset was selected")
 			return {'CANCELLED'}
 
-			
-		# Over-ride some export settings
-		
+		# Over-ride some export settings		
 		export_settings["export_format"]                        = settings.gltf_export_format
-		export_settings["export_draco_mesh_compression_enable"] = settings.gltf_use_draco
-		
+		export_settings["export_draco_mesh_compression_enable"] = settings.gltf_use_draco		
 		export_settings["use_active_collection"]                = True
 		export_settings["use_active_collection_with_nested"]    = True
 		export_settings["use_active_scene"]                     = False
@@ -156,6 +135,8 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		export_settings["use_selection"]                        = False
 		export_settings["use_visible"]                          = False
 
+		# Ensure we're in the right mode
+		ensure_object_mode()
 
 		# Loop through all collections to export
 		for name, col in collectionsToExport.items():
@@ -166,7 +147,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 
 			# Run the export
 			Log("Exporting as " + name + " to path: " + file_path)
-			self.ExportCollectionToGLtf(col, export_settings, settings.gltf_ignore_transform)
+			self.export_collection_gltf(col, export_settings, settings.gltf_ignore_transform)
 
 		self.report({'INFO'}, f"Exported {len(collectionsToExport)} collections")
 		return {'FINISHED'}

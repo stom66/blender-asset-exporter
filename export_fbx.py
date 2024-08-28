@@ -3,15 +3,15 @@ import os
 from xml.etree.ElementTree import tostring
 
 from . collections import FindCollectionsWithPrefix
-from . export_utils import GetExportPath
 from . logging import Log
-
+from . util import *
 
 
 class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 	bl_idname  = "ae.export_fbx"
 	bl_label   = "Export Collections to FBX"
 	bl_options = {'REGISTER', 'UNDO'}
+	bl_description = "Exports matching collections to FBX files"
 
 
 	# ███████╗██╗  ██╗██████╗  ██████╗ ██████╗ ████████╗███████╗██████╗
@@ -21,7 +21,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 	# ███████╗██╔╝ ██╗██║     ╚██████╔╝██║  ██║   ██║   ███████╗██║  ██║
 	# ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 	#
-	def ExportCollectionToFBX(
+	def export_collection_fbx(
 		self, 
 		collection     : bpy.types.Collection, 
 		export_settings: dict
@@ -54,7 +54,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 	# ██║ ╚████║███████╗██║  ██║       ██║   ██║  ██║██║  ██║╚██████╗██║  ██╗███████║
 	# ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝       ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝
 	#                                                                                
-	def ExportSingleNLATrackToFBX(
+	def export_single_nla_track_fbx(
 		self, 
 		collection     : bpy.types.Collection,
 		armature       : bpy.types.Armature,
@@ -113,7 +113,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		settings = bpy.context.scene.ae_settings
 
         # Get output path:
-		path = GetExportPath()
+		path = get_export_path()
 
 		# Get a dict of the collections to export with their name as the key
 		collectionsToExport = FindCollectionsWithPrefix(settings.export_prefix)
@@ -126,55 +126,39 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 
 		# Initialize export settings
 		export_settings = {}
-
+		
 		# Read in export settings from selected preset
 		if settings.fbx_preset != 'NONE':
-			preset_file_path = os.path.join(bpy.utils.preset_paths('operator/export_scene.fbx/')[0], settings.fbx_preset.replace(" ", "_") + ".py")
-			if os.path.exists(preset_file_path):
-
-				# Create a dummy containter class to hold the settings in
-				class Container(object):
-					__slots__ = ('__dict__',)
-
-				op = Container()
-				file = open(preset_file_path, 'r')
-
-				# storing the values from the preset on the class
-				for line in file.readlines()[3::]:
-					exec(line, globals(), locals())
-
-				# pass class dictionary to the operator				
-				for key in op.__dict__:
-					export_settings[key] = op.__dict__[key]
-				
-				Log("Finished building export settings")
-
-			else:
-				self.report({'ERROR'}, f"Preset file not found: {preset_file_path}")
-				Log(f"Preset file not found: {preset_file_path}")
+			export_settings = read_export_operator_preset(settings.fbx_preset, "fbx")
+			if not export_settings:
+				self.report({'ERROR'}, f"Preset file not found: {settings.fbx_preset}")
+				Log(f"Preset file not found: {settings.fbx_preset}")
 				return {'CANCELLED'}
+
 		else:
 			self.report({'ERROR'}, "No export preset was selected")
 			Log("No export preset was selected")
 			return {'CANCELLED'}
 
+
 		export_settings["use_selection"] = False
 		export_settings["use_visible"]   = False
 		export_settings["use_active_collection"] = True
+
+		# Ensure we're in the right mode
+		ensure_object_mode()
 
 		# Export all the collections
 		files = 0
 		for name, col in collectionsToExport.items():
 
-			
 			# Set the export file name to match the collection name (minus the MATCH_STRING)
 			file_path = str((path + '/' + name + '.fbx'))
 			export_settings["filepath"] = file_path
-
 			
             # Run the export
 			Log("Exporting as " + name + " to path: " + file_path)
-			self.ExportCollectionToFBX(col, export_settings)
+			self.export_collection_fbx(col, export_settings)
 			files += 1
 			
             # If we are splitting NLA tracks, eg exporting a single file per NLA track, then we need to loop through and check for amratures:
@@ -188,7 +172,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 							export_settings["filepath"] = file_path
 
 							Log(f"Exporting NLA Track: {track.name} for armature: {obj.name}")
-							self.ExportSingleNLATrackToFBX(col, obj, track, export_settings)
+							self.export_single_nla_track_fbx(col, obj, track, export_settings)
 							files += 1
 
 

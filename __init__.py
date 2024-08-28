@@ -18,7 +18,7 @@ bl_info = {
 	"name"       : "Asset Exporter",
 	"description": "Quickly export multiple Collections to glTF or FBX",
 	"author"     : "Tom Steventon - stom66",
-	"version"    : (0, 2, 2),
+	"version"    : (0, 2, 3),
 	"blender"    : (4, 1, 0),
 	"location"   : "3D Viewport -> Sidebar -> Asset Exporter",
 	"category"   : "Import-Export",
@@ -38,27 +38,32 @@ from . ui 			import *
 # ██║  ██║███████╗╚██████╔╝██║███████║   ██║   ██║  ██║██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║
 # ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 #
-		
+
+classes = (
+	AssetExporterSettings,
+	EXPORT_OT_AssetExporter_ExportToGLTF,
+	EXPORT_OT_AssetExporter_ExportToFBX,
+	VIEW3D_PT_AssetExporter_UI_Main,
+	VIEW3D_PT_AssetExporter_UI_FBX,
+	VIEW3D_PT_AssetExporter_UI_FBX_Settings,
+	VIEW3D_PT_AssetExporter_UI_FBX_Btn,
+	VIEW3D_PT_AssetExporter_UI_GLTF,
+	VIEW3D_PT_AssetExporter_UI_GLTF_Settings,
+	VIEW3D_PT_AssetExporter_UI_GLTF_Btn
+)
+
 def register():
-	# Register settings class
-	bpy.utils.register_class(AssetExporterSettings)
+	# Register classes
+	for cls in classes:
+		bpy.utils.register_class(cls)
+
+	# Register settings
 	bpy.types.Scene.ae_settings = bpy.props.PointerProperty(type=AssetExporterSettings)
 
-	bpy.utils.register_class(EXPORT_OT_AssetExporter_ExportToGLTF)
-	bpy.utils.register_class(EXPORT_OT_AssetExporter_ExportToFBX)
-	bpy.utils.register_class(VIEW3D_PT_AssetExporter_UI_Main)
-	bpy.utils.register_class(VIEW3D_PT_AssetExporter_UI_FBX)
-	bpy.utils.register_class(VIEW3D_PT_AssetExporter_UI_GLTF)
-
-
 def unregister():
-	# Unregister various UI component classes
-	bpy.utils.unregister_class(VIEW3D_PT_AssetExporter_UI_Main)
-	bpy.utils.unregister_class(VIEW3D_PT_AssetExporter_UI_FBX)
-	bpy.utils.unregister_class(VIEW3D_PT_AssetExporter_UI_GLTF)
-	bpy.utils.unregister_class(EXPORT_OT_AssetExporter_ExportToFBX)
-	bpy.utils.unregister_class(EXPORT_OT_AssetExporter_ExportToGLTF)
+	# Unregister all classes
+	for cls in classes:
+		bpy.utils.unregister_class(cls)
 
-	# Unregister settings class
-	bpy.utils.unregister_class(AssetExporterSettings)
+	# Unregister settings
 	del bpy.types.Scene.ae_settings

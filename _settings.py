@@ -26,8 +26,18 @@ def list_presets(file_ext):
 
 
 
+
 # Define default settings
 class AssetExporterSettings(bpy.types.PropertyGroup):
+
+	
+	
+	# Update callback function to refresh presets dynamically
+	def update_presets(self, context):
+		# Update both gltf and fbx presets
+		self['gltf_preset'] = list_presets('gltf')
+		self['fbx_preset'] = list_presets('fbx')
+		
 
     # String: Export collection prefix
 	export_prefix: bpy.props.StringProperty(
@@ -58,7 +68,8 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 	gltf_preset: bpy.props.EnumProperty(
 		name        = "glTF Preset",
 		description = "Choose a glTF export preset",
-		items       = list_presets("gltf")
+		items       = lambda self, context: list_presets("gltf"),
+		update      = update_presets  # Set the callback to update the list
 	) # type: ignore
 
 	# Dropdown: File format: gltf or glb
@@ -118,7 +129,8 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 	fbx_preset: bpy.props.EnumProperty(
 		name        = "FBX Preset",
 		description = "Choose an FBX export preset",
-		items       = list_presets("fbx")
+		items       = lambda self, context: list_presets("fbx"),
+		update      = update_presets  # Set the callback to update the list
 	) # type: ignore
 
 	# --- Settings
@@ -128,4 +140,5 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 		name        = "Split NLA tracks",
 		description = "If enabled then multiple exports will be created, featuring a single NLA track per file",
 		default     = False,
+		
 	) # type: ignore

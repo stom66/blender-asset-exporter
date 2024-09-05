@@ -89,7 +89,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		export_settings["bake_anim_use_all_actions"] = False
 
 		# Only export armatures
-		export_settings["object_types"]= {'ARMATURE'}
+		# export_settings["object_types"]= {'ARMATURE'}
 
 		# Do the actual export, with big block of settings
 		bpy.ops.export_scene.fbx(**export_settings)

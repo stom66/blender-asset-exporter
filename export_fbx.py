@@ -1,5 +1,6 @@
 import bpy
 import os
+import time
 from xml.etree.ElementTree import tostring
 
 from . collections import FindCollectionsWithPrefix
@@ -61,8 +62,6 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		nla_track      : bpy.types.NlaTrack,
 		export_settings: dict
 	):
-		# Deselect all objects
-		bpy.ops.object.select_all(action='DESELECT')
 
 		# Select the armature and its collection
 		armature.select_set(True)
@@ -82,9 +81,6 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		# Set the collection as the active collection
 		bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection.children[collection.name]
 
-		# Deselect all the objects
-		bpy.ops.object.select_all(action='DESELECT')
-
 		# Ensure we only export a single animation:
 		export_settings["bake_anim_use_all_actions"] = False
 
@@ -98,6 +94,28 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		for key, track in armature.animation_data.nla_tracks.items():
 			track.mute = orig_track_states[key]
 
+
+	# ██████╗ ██████╗  ██████╗  ██████╗███████╗███████╗███████╗     ██████╗ ██╗   ██╗███████╗██╗   ██╗███████╗
+	# ██╔══██╗██╔══██╗██╔═══██╗██╔════╝██╔════╝██╔════╝██╔════╝    ██╔═══██╗██║   ██║██╔════╝██║   ██║██╔════╝
+	# ██████╔╝██████╔╝██║   ██║██║     █████╗  ███████╗███████╗    ██║   ██║██║   ██║█████╗  ██║   ██║█████╗  
+	# ██╔═══╝ ██╔══██╗██║   ██║██║     ██╔══╝  ╚════██║╚════██║    ██║▄▄ ██║██║   ██║██╔══╝  ██║   ██║██╔══╝  
+	# ██║     ██║  ██║╚██████╔╝╚██████╗███████╗███████║███████║    ╚██████╔╝╚██████╔╝███████╗╚██████╔╝███████╗
+	# ╚═╝     ╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚══════╝╚══════╝╚══════╝     ╚══▀▀═╝  ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝
+	#                                                                                                         
+	def process_queue(self, queue, export_settings, path):
+		if not queue:
+			self.report({'INFO'}, "Export complete.")
+			return None
+
+		col, obj, track, name = queue.pop(0)
+
+		file_path = str((path + '/' + name + '.' + track.name + '.fbx'))
+		export_settings["filepath"] = file_path
+
+		Log(f"Exporting NLA Track: {track.name} for armature: {obj.name}")
+		self.export_single_nla_track_fbx(col, obj, track, export_settings)
+
+		return 0.5
 
 
 	# ███╗   ███╗ █████╗ ██╗███╗   ██╗
@@ -150,6 +168,8 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 
 		# Export all the collections
 		files = 0
+		nla_queue = []
+
 		for name, col in collectionsToExport.items():
 
 			# Set the export file name to match the collection name (minus the MATCH_STRING)
@@ -160,6 +180,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 			Log("Exporting as " + name + " to path: " + file_path)
 			self.export_collection_fbx(col, export_settings)
 			files += 1
+
 			
             # If we are splitting NLA tracks, eg exporting a single file per NLA track, then we need to loop through and check for amratures:
 			if settings.fbx_split_nla:
@@ -167,13 +188,12 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 				for obj in bpy.data.collections[col.name].all_objects:
 					if obj.type == 'ARMATURE' and obj.animation_data and obj.animation_data.nla_tracks:
 						for track in obj.animation_data.nla_tracks:
-							
-							file_path = str((path + '/' + name + '.' + track.name + '.fbx'))
-							export_settings["filepath"] = file_path
-
-							Log(f"Exporting NLA Track: {track.name} for armature: {obj.name}")
-							self.export_single_nla_track_fbx(col, obj, track, export_settings)
 							files += 1
+							nla_queue.append((col, obj, track, name))
+
+
+			if nla_queue:
+				bpy.app.timers.register(lambda: self.process_queue(nla_queue, export_settings, path))
 
 
 			# Build the return info message

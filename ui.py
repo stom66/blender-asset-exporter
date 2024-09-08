@@ -119,30 +119,30 @@ class VIEW3D_PT_AssetExporter_UI_GLTF_Settings(bpy.types.Panel):
 		# Checkbox: glTF: use Draco
 		row = layout.row()
 		col = row.column(align=False)
-		col.label(text="Use Draco compression")
+		col.label(text=settings.bl_rna.properties['gltf_use_draco'].name)
 		col = row.column(align=True)
 		col.prop(settings, "gltf_use_draco", text="")
 		
 		# Checkbox: glTF: ignore root transforms
 		row = layout.row()
 		col = row.column(align=False)
-		col.label(text="Ignore root transforms")
+		col.label(text=settings.bl_rna.properties['gltf_ignore_transform'].name)
 		col = row.column(align=True)
 		col.prop(settings, "gltf_ignore_transform", text="")
 
 		# Checkbox: glTF: remove "Smooth by Angle"
 		row = layout.row()
 		col = row.column(align=False)
-		col.label(text="Remove \"Smooth by Angle\" modifiers")
+		col.label(text=settings.bl_rna.properties['gltf_remove_modifier_smooth_by_angle'].name)
 		col = row.column(align=True)
 		col.prop(settings, "gltf_remove_modifier_smooth_by_angle", text="")
 
 		# Checkbox: glTF: clean custom props
 		row = layout.row()
 		col = row.column(align=False)
-		col.label(text="Remove custom properties")
+		col.label(text=settings.bl_rna.properties['gltf_hardops_bug_workaround'].name)
 		col = row.column(align=True)
-		col.prop(settings, "gltf_clean_custom_props", text="")
+		col.prop(settings, "gltf_hardops_bug_workaround", text="")
 
 		
 

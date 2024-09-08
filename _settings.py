@@ -108,8 +108,8 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 	) # type: ignore
 
 	# Toggle: Workaround: Clean custom properties
-	gltf_clean_custom_props: bpy.props.BoolProperty(
-		name        = "Clean custom properties",
+	gltf_hardops_bug_workaround: bpy.props.BoolProperty(
+		name        = "Bugfix: Remove HardOps data",
 		description = "Workaround for a bug with HardOps and the glTF exporter: removes any custom properties from the mesh data block",
 		default     = False,
 	) # type: ignore

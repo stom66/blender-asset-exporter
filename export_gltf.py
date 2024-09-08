@@ -50,10 +50,13 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		# Deselect all the objects
 		bpy.ops.object.select_all(action='DESELECT')
 
+		collection = bpy.data.collections.get(collection.name)
+		all_objects = get_all_objects_in_collection(collection)
+
 		# Save transforms
 		orig_transforms = {}
 		if ignore_transforms:
-			for obj in bpy.data.collections.get(collection.name).objects:
+			for obj in all_objects:
 				if obj.parent is None:
 					print("Ignoring transform for ", obj.name)
 
@@ -69,14 +72,13 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 
 		# Remove the "Smooth by Angle" modifiers if enabled
 		if settings.gltf_remove_modifier_smooth_by_angle:
-			for obj in bpy.data.collections.get(collection.name).objects:
+			for obj in all_objects:
 				disable_smooth_by_angle_modifier(obj)
 
 		# Remove custom properties
-		if settings.gltf_clean_custom_props:
-			for obj in bpy.data.collections.get(collection.name).objects:
-				if obj.type == 'MESH':
-					clean_custom_properties(obj)
+		if settings.gltf_hardops_bug_workaround:
+			for obj in bpy.data.objects:
+				clean_hardops_properties(obj)
 
 		# Export using the custom exporter
 		bpy.ops.export_scene.gltf(**export_settings)

@@ -16,6 +16,15 @@ Developed using the following VSCode Extensions:
 * [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
 
 
+## Dev setup
+
+* Install the recommend extensions via `Ctrl+Shift+P` -> `Extensions: Show Recommended Extensions`
+* Download Blender portable to somewhere
+* In VSCode, `Ctrl+Shift+P` -> `Blender: Start`
+* Configure it to start the portable blender we downloaded
+* Edit code, changes are handled by the Blender Development extension
+
+
 ## Releasing new versions
 
 The GitHub repository is configured with a workflow action to create a release zip upon pushing a new tag.

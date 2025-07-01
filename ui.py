@@ -31,6 +31,7 @@ class VIEW3D_PT_AssetExporter_UI_FBX(bpy.types.Panel):
 	bl_region_type = 'UI'
 	bl_space_type  = 'VIEW_3D'
 	bl_parent_id   = 'VIEW3D_PT_AssetExporter_UI_Main'
+	bl_options     = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		layout = self.layout
@@ -42,11 +43,12 @@ class VIEW3D_PT_AssetExporter_UI_FBX(bpy.types.Panel):
 
 # FBX Export Settings
 class VIEW3D_PT_AssetExporter_UI_FBX_Settings(bpy.types.Panel):
-	bl_label       = 'Settings'
+	bl_label       = 'FBX Export Settings'
 	bl_category    = 'Asset Exporter'
 	bl_region_type = 'UI'
 	bl_space_type  = 'VIEW_3D'
 	bl_parent_id   = 'VIEW3D_PT_AssetExporter_UI_FBX'
+	bl_options     = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		layout = self.layout
@@ -58,6 +60,13 @@ class VIEW3D_PT_AssetExporter_UI_FBX_Settings(bpy.types.Panel):
 		col.label(text="Split NLA tracks")
 		col = row.column(align=True) 
 		col.prop(context.scene.ae_settings, "fbx_split_nla", text="")
+		
+		# Checkbox: FBX: ignore root transforms
+		row = layout.row()
+		col = row.column(align=False)
+		col.label(text="Ignore root transforms")
+		col = row.column(align=True)
+		col.prop(settings, "fbx_ignore_transform", text="")
 
 
 # glTF Export Button
@@ -86,6 +95,7 @@ class VIEW3D_PT_AssetExporter_UI_GLTF(bpy.types.Panel):
 	bl_region_type = 'UI'
 	bl_space_type  = 'VIEW_3D'
 	bl_parent_id   = 'VIEW3D_PT_AssetExporter_UI_Main'
+	bl_options     = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		layout = self.layout
@@ -106,11 +116,12 @@ class VIEW3D_PT_AssetExporter_UI_GLTF(bpy.types.Panel):
 
 # glTF Export Settings
 class VIEW3D_PT_AssetExporter_UI_GLTF_Settings(bpy.types.Panel):
-	bl_label       = 'Settings'
+	bl_label       = 'glTF Expport Settings'
 	bl_category    = 'Asset Exporter'
 	bl_region_type = 'UI'
 	bl_space_type  = 'VIEW_3D'
 	bl_parent_id   = 'VIEW3D_PT_AssetExporter_UI_GLTF'
+	bl_options     = {'DEFAULT_CLOSED'}
 
 	def draw(self, context):
 		layout = self.layout

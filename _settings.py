@@ -30,8 +30,6 @@ def list_presets(file_ext):
 # Define default settings
 class AssetExporterSettings(bpy.types.PropertyGroup):
 
-	
-	
 	# Update callback function to refresh presets dynamically
 	def update_presets(self, context):
 		# Update both gltf and fbx presets
@@ -43,7 +41,7 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 	export_prefix: bpy.props.StringProperty(
 		name        = "Collection prefix",
 		description = "Specify the prefix used to search for collections",
-		default     = "_export.",
+		default     = "_",
 	) # type: ignore
 
 	# String: Output path
@@ -100,7 +98,7 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 	) # type: ignore
 
 
-	# Toggle: Workaround: Ignore root transform
+	# Toggle: Workaround: Remove Smooth By Angle modfiiers, for HardOps bug
 	gltf_remove_modifier_smooth_by_angle: bpy.props.BoolProperty(
 		name        = "Remove \"Smooth by Angle\" modifier",
 		description = "Workaround for a bug with HardOps and the glTF exporter: Remove these modifiers on export as they currently cause problems with the glTF exporter",
@@ -141,4 +139,11 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 		description = "If enabled then multiple exports will be created, featuring a single NLA track per file",
 		default     = False,
 		
+	) # type: ignore
+
+	# Toggle: Ignore root transform
+	fbx_ignore_transform: bpy.props.BoolProperty(
+		name        = "Ignore root transform",
+		description = "If enabled, objects in the root of the collection will be moved back to 0,0,0 for the export.",
+		default     = False,
 	) # type: ignore

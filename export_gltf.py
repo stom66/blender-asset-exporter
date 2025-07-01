@@ -50,22 +50,10 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		# Deselect all the objects
 		bpy.ops.object.select_all(action='DESELECT')
 
-		# Save transforms
+		# Temporarily reset transforms if needed
 		orig_transforms = {}
 		if ignore_transforms:
-			for obj in bpy.data.collections.get(collection.name).objects:
-				if obj.parent is None:
-					print("Ignoring transform for ", obj.name)
-
-					orig_transforms[obj] = {
-						'location'      : obj.location.copy(),
-						'rotation_euler': obj.rotation_euler.copy(),
-						'scale'         : obj.scale.copy()
-					}
-					
-					obj.location       = (0, 0, 0)
-					obj.rotation_euler = (0, 0, 0)
-					obj.scale          = (1, 1, 1)
+			orig_transforms = apply_identity_transforms(self, collection)
 
 		# Remove the "Smooth by Angle" modifiers if enabled
 		if settings.gltf_remove_modifier_smooth_by_angle:
@@ -81,12 +69,9 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		# Export using the custom exporter
 		bpy.ops.export_scene.gltf(**export_settings)
 
-		# Restore transformations
-		if ignore_transforms:			
-			for obj, transform in orig_transforms.items():
-				obj.location       = transform['location']
-				obj.rotation_euler = transform['rotation_euler']
-				obj.scale          = transform['scale']
+		# Restore original transforms if needed
+		if ignore_transforms:
+			restore_original_transforms(self, orig_transforms)
 
 		
 	def execute(self, context):

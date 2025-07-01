@@ -119,3 +119,46 @@ def clean_custom_properties(obj: bpy.types.Object) -> None:
             keys_to_remove = [key for key in obj.data.keys() if key.startswith("_") or key == "hops"]
             for key in keys_to_remove:
                 del obj.data[key]
+
+
+def apply_identity_transforms(self, collection: bpy.types.Collection):
+    """
+    Temporarily reset transforms (location, rotation, scale) to identity values 
+    for all top-level objects in the given collection.
+
+    Args:
+        collection (bpy.types.Collection): The collection containing the objects to process.
+
+    Returns:
+        dict: A dictionary mapping objects to their original transforms.
+    """
+    orig_transforms = {}
+    for obj in bpy.data.collections.get(collection.name).objects:
+        if obj.parent is None:
+            print("Ignoring transform for", obj.name)
+            orig_transforms[obj] = {
+                'location': obj.location.copy(),
+                'rotation_euler': obj.rotation_euler.copy(),
+                'scale': obj.scale.copy()
+            }
+            obj.location = (0, 0, 0)
+            obj.rotation_euler = (0, 0, 0)
+            obj.scale = (1, 1, 1)
+    return orig_transforms
+
+
+def restore_original_transforms(self, orig_transforms: dict):
+    """
+    Restore original transforms (location, rotation, scale) to the objects 
+    previously processed by apply_identity_transforms.
+
+    Args:
+        orig_transforms (dict): A dictionary mapping objects to their original transforms.
+
+    Returns:
+        None
+    """
+    for obj, transform in orig_transforms.items():
+        obj.location = transform['location']
+        obj.rotation_euler = transform['rotation_euler']
+        obj.scale = transform['scale']

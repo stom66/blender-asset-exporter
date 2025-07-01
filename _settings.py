@@ -32,9 +32,11 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 
 	# Update callback function to refresh presets dynamically
 	def update_presets(self, context):
-		# Update both gltf and fbx presets
-		self['gltf_preset'] = list_presets('gltf')
-		self['fbx_preset'] = list_presets('fbx')
+		# This triggers UI redraw and re-evaluation of the enum items lambda
+		for window in context.window_manager.windows:
+			for area in window.screen.areas:
+				if area.type == 'VIEW_3D':
+					area.tag_redraw()
 		
 
     # String: Export collection prefix

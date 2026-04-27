@@ -46,3 +46,5 @@ jobs:
         tag: ${{ github.ref_name }}
         name: ${{ github.ref_name }}
         bodyFile: RELEASE_NOTES.md
+        # GitHub otherwise picks "Latest" by semver heuristics; without a clear winner the UI may not show a latest link.
+        makeLatest: true

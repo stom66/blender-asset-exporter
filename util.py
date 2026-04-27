@@ -28,46 +28,57 @@ def get_export_path() -> str:
 	return path
 
 
-def read_export_operator_preset(preset: str, file_ext: str) -> dict:
-    """
-    Read and parse a Blender export operator preset.
+def read_export_operator_preset(preset: str, file_ext: str) -> tuple[dict | None, str | None]:
+	"""
+	Read and parse a Blender export operator preset.
 
-    Args:
-        preset (str): The name of the preset file (without the extension).
-        file_ext (str): The file extension related to the export type (e.g., 'gltf', 'fbx').
+	Args:
+		preset (str): The name of the preset file (without the extension).
+		file_ext (str): The file extension related to the export type (e.g., 'gltf', 'fbx').
 
-    Returns:
-        dict: A dictionary containing export settings if the preset exists.
-        bool: False if the preset file does not exist.
-    """
+	Returns:
+		On success: (export_settings dict, None).
+		On failure: (None, user-facing error message).
+	"""
 
-    # Get ready to store contents
-    export_settings = {}
+	export_settings = {}
 
-    preset_file_path = os.path.join(bpy.utils.preset_paths(f'operator/export_scene.{file_ext}/')[0], preset.replace(" ", "_") + ".py")
-    if os.path.exists(preset_file_path):
+	preset_subpath = f'operator/export_scene.{file_ext}/'
+	preset_dirs = bpy.utils.preset_paths(preset_subpath)
+	if not preset_dirs:
+		msg = (
+			f'No export preset support is registered for "{file_ext}" in this Blender build. '
+			'Open File → Export for that format, configure the dialog, then save a preset from the preset menu; '
+			'after that, choose it in Asset Exporter before exporting.'
+		)
+		return None, msg
 
-        # Create a dummy containter class to hold the settings in
-        class Container(object):
-            __slots__ = ('__dict__',)
+	preset_file_path = os.path.join(preset_dirs[0], preset.replace(" ", "_") + ".py")
+	if not os.path.exists(preset_file_path):
+		msg = (
+			f'Preset "{preset}" was not found. '
+			'Save a preset with that name from the export dialog, or pick another preset in Asset Exporter settings.'
+		)
+		return None, msg
 
-        op = Container()
-        file = open(preset_file_path, 'r')
+	# Create a dummy containter class to hold the settings in
+	class Container(object):
+		__slots__ = ('__dict__',)
 
-        # storing the values from the preset on the class
-        for line in file.readlines()[3::]:
-            exec(line, globals(), locals())
+	op = Container()
+	file = open(preset_file_path, 'r')
 
-        # pass class dictionary to the operator				
-        for key in op.__dict__:
-            export_settings[key] = op.__dict__[key]
+	# storing the values from the preset on the class
+	for line in file.readlines()[3::]:
+		exec(line, globals(), locals())
 
-        Log("Finished building export settings")
+	# pass class dictionary to the operator
+	for key in op.__dict__:
+		export_settings[key] = op.__dict__[key]
 
-        return export_settings
+	Log("Finished building export settings")
 
-    else:
-        return False
+	return export_settings, None
 
 
 def ensure_object_mode() -> None:
@@ -134,7 +145,11 @@ def apply_identity_transforms(self, collection: bpy.types.Collection):
     """
     orig_transforms = {}
     for obj in bpy.data.collections.get(collection.name).objects:
-        if obj.parent is None:
+        # Only reset transforms for top-level, non-armature objects.
+        # Armatures often define the orientation for skinned meshes, and
+        # touching their object transforms can lead to unexpected rotation
+        # offsets in the scene after export.
+        if obj.parent is None and obj.type != 'ARMATURE':
             print("Ignoring transform for", obj.name)
             orig_transforms[obj] = {
                 'location': obj.location.copy(),

@@ -25,7 +25,7 @@ Developed using the following VSCode Extensions:
 
 ## Releasing new versions
 
-The GitHub Actions workflow creates a GitHub Release and zip when you **push a version tag**. It checks out **full git history** (`fetch-depth: 0`), regenerates **`CHANGELOG.md`** from all semver tags (`conventional-changelog` with `-r 0`), attaches that file as the release body and inside the zip.
+The GitHub Actions workflow creates a GitHub Release and zip when you **push a version tag**. It checks out **full git history** (`fetch-depth: 0`), regenerates **`CHANGELOG.md`** from all semver tags (`conventional-changelog` with `-r 0`) and puts that file **in the zip only**. The GitHub Release description uses **`RELEASE_NOTES.md`**, generated with **`-r 1`** so it lists **only the current tag’s changes**.
 
 ### Bump version, commit, tag, and push
 
@@ -55,10 +55,14 @@ python3 scripts/release_bump.py patch --commit --tag --push
 Requires [Node.js](https://nodejs.org/) and git tags in your clone:
 
 ```sh
+# Full history (matches the zip)
 npx --yes conventional-changelog-cli -p angular -o CHANGELOG.md -r 0
+
+# Single release — same idea as the GitHub Release body
+npx --yes conventional-changelog-cli -p angular -o RELEASE_NOTES.md -r 1
 ```
 
-If you have commits on `main` that are **after** the latest tag, you may see a blank “unreleased” section at the top; a tag build on CI only sees the tagged commit, so release zips stay clean.
+If you have commits on `main` that are **after** the latest tag, you may see a blank “unreleased” section at the top of the full changelog; a tag build on CI only sees the tagged commit, so release zips stay clean.
 
 ### Manual tag (if you edited versions yourself)
 

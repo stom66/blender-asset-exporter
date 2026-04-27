@@ -1,46 +1,48 @@
-name: Create Release
-
-on:
-  push:
-    tags:
-    - '*'
-  workflow_dispatch:
-
-jobs:
-  create-release:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - name: Install conventional-changelog-cli
-      run: npm install -g conventional-changelog-cli
-
-    - name: Generate Changelog
-      run: conventional-changelog -p angular -o CHANGELOG.md -r 0
-
-    - name: Create Release Archive
-      run: |
-        mkdir -p blender-asset-exporter
-        cp CHANGELOG.md COPYING README.md blender_manifest.toml *.py blender-asset-exporter/
-        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" blender-asset-exporter
-        rm -rf blender-asset-exporter
-
-    - name: Upload Release
-      uses: ncipollo/release-action@v1.12.0
-      with:
-        artifacts: "blender-asset-exporter-${{ github.ref_name }}.zip"
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ github.ref_name }}
-        name: ${{ github.ref_name }}
-        bodyFile: CHANGELOG.md
+name: Create Release
+
+on:
+  push:
+    tags:
+    - '*'
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install conventional-changelog-cli
+      run: npm install -g conventional-changelog-cli
+
+    - name: Generate changelogs
+      run: |
+        conventional-changelog -p angular -o CHANGELOG.md -r 0
+        conventional-changelog -p angular -o RELEASE_NOTES.md -r 1
+
+    - name: Create Release Archive
+      run: |
+        mkdir -p blender-asset-exporter
+        cp CHANGELOG.md COPYING README.md blender_manifest.toml *.py blender-asset-exporter/
+        zip -r "blender-asset-exporter-${{ github.ref_name }}.zip" blender-asset-exporter
+        rm -rf blender-asset-exporter
+
+    - name: Upload Release
+      uses: ncipollo/release-action@v1.12.0
+      with:
+        artifacts: "blender-asset-exporter-${{ github.ref_name }}.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
+        bodyFile: RELEASE_NOTES.md

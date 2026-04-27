@@ -96,11 +96,11 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		export_settings = {}
 
 		# Read in export settings from selected preset
-		if settings.fbx_preset != 'NONE':
-			export_settings = read_export_operator_preset(settings.gltf_preset, "gltf")
-			if not export_settings:
-				self.report({'ERROR'}, f"Preset file not found: {settings.gltf_preset}")
-				Log(f"Preset file not found: {settings.gltf_preset}")
+		if settings.gltf_preset != 'NONE':
+			export_settings, preset_error = read_export_operator_preset(settings.gltf_preset, "gltf")
+			if preset_error:
+				self.report({'ERROR'}, preset_error)
+				Log(f"read_export_operator_preset: {preset_error}")
 				return {'CANCELLED'}
 
 		else:

@@ -137,8 +137,12 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		# Get settings
 		settings = bpy.context.scene.ae_settings
 
-        # Get output path:
-		path = get_export_path()
+		# Get output path
+		path, path_error	= get_export_path_or_error()
+		if path_error:
+			Log(f"AssetExporter: export_fbx: {path_error}")
+			self.report({'ERROR'}, path_error)
+			return {'CANCELLED'}
 
 		# Get a dict of the collections to export with their name as the key
 		collectionsToExport = FindCollectionsWithPrefix(settings.export_prefix)
@@ -178,12 +182,18 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		for name, layer_col in collectionsToExport.items():
 
 			# Set the export file name to match the collection name (minus the MATCH_STRING)
-			file_path	= str((path + '/' + name + '.fbx'))
+			file_path	= os.path.join(path, name + ".fbx")
 			export_settings["filepath"]	= file_path
 
 			# Run the export
 			Log("Exporting as " + name + " to path: " + file_path)
-			self.export_collection_fbx(layer_col, export_settings, settings.fbx_ignore_transform)
+			try:
+				self.export_collection_fbx(layer_col, export_settings, settings.fbx_ignore_transform)
+			except (OSError, RuntimeError) as e:
+				msg	= "Export failed. Check that the output path is a valid, writable folder."
+				Log(f"AssetExporter: export_fbx: {msg} ({e!r})")
+				self.report({'ERROR'}, msg)
+				return {'CANCELLED'}
 			files += 1
 
 			# If we are splitting NLA tracks, eg exporting a single file per NLA track, then we need to loop through and check for amratures:
@@ -193,24 +203,30 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 					if obj.type == 'ARMATURE' and obj.animation_data and obj.animation_data.nla_tracks:
 						for track in obj.animation_data.nla_tracks:
 
-							file_path	= str((path + '/' + name + '.' + track.name + '.fbx'))
+							file_path	= os.path.join(path, name + "." + track.name + ".fbx")
 							export_settings["filepath"]	= file_path
 
 							Log(f"Exporting NLA Track: {track.name} for armature: {obj.name}")
-							self.export_single_nla_track_fbx(
-								layer_col,
-								obj,
-								track,
-								export_settings,
-								settings.fbx_ignore_transform
-							)
+							try:
+								self.export_single_nla_track_fbx(
+									layer_col,
+									obj,
+									track,
+									export_settings,
+									settings.fbx_ignore_transform
+								)
+							except (OSError, RuntimeError) as e:
+								msg	= "Export failed. Check that the output path is a valid, writable folder."
+								Log(f"AssetExporter: export_fbx: {msg} ({e!r})")
+								self.report({'ERROR'}, msg)
+								return {'CANCELLED'}
 							files += 1
 
 
 			# Build the return info message
-			info_msg = f"Exported {len(collectionsToExport)} collections"
+			info_msg	= f"Exported {len(collectionsToExport)} collections to: {path}"
 			if settings.fbx_split_nla:
-				info_msg = info_msg + f" to {files} files"
+				info_msg	= f"{info_msg} ({files} files)"
 
 		self.report({'INFO'}, info_msg)
 

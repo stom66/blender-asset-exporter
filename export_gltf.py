@@ -79,8 +79,12 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		# Get settings
 		settings = bpy.context.scene.ae_settings
 
-        # Get output path:
-		path = get_export_path()
+		# Get output path
+		path, path_error	= get_export_path_or_error()
+		if path_error:
+			Log(f"AssetExporter: export_gltf: {path_error}")
+			self.report({'ERROR'}, path_error)
+			return {'CANCELLED'}
 
 		# Get a dict of the collections to export with their name as the key
 		collectionsToExport = FindCollectionsWithPrefix(settings.export_prefix)
@@ -127,12 +131,21 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		for name, layer_col in collectionsToExport.items():
 
 			# Set the export file name to match the collection name (minus the MATCH_STRING)
-			file_path	= str((path + '/' + name + '.gltf'))
+			file_path	= os.path.join(path, name + ".gltf")
 			export_settings["filepath"]	= file_path
 
 			# Run the export
 			Log("Exporting as " + name + " to path: " + file_path)
-			self.export_collection_gltf(layer_col, export_settings, settings.gltf_ignore_transform)
+			try:
+				self.export_collection_gltf(layer_col, export_settings, settings.gltf_ignore_transform)
+			except (OSError, RuntimeError) as e:
+				msg	= "Export failed. Check that the output path is a valid, writable folder."
+				Log(f"AssetExporter: export_gltf: {msg} ({e!r})")
+				self.report({'ERROR'}, msg)
+				return {'CANCELLED'}
 
-		self.report({'INFO'}, f"Exported {len(collectionsToExport)} collections")
+		self.report(
+			{'INFO'},
+			f"Exported {len(collectionsToExport)} collections to: {path}"
+		)
 		return {'FINISHED'}

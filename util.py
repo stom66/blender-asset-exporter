@@ -2,30 +2,47 @@ import bpy
 import os
 from . addon_log import Log
 
-def get_export_path() -> str:
+
+def _output_path_is_blend_relative(raw: str) -> bool:
+	"""True if the user path uses Blender's // (relative to the .blend file) convention."""
+	n	= raw.replace("\\", "/").strip()
+	return n.startswith("//")
+
+
+def get_export_path_or_error() -> tuple[str | None, str | None]:
 	"""
-	Get the export path for the collection.
+	Resolve the output *directory* from scene settings, create it if possible.
 
 	Returns:
-	- str: The export path.
+		(absolute_dir_path, None) on success,
+		(None, user-facing error message) on failure.
 	"""
-	# Get settings
-	ae_settings = bpy.context.scene.ae_settings
+	ae_settings	= bpy.context.scene.ae_settings
+	raw		= (ae_settings.output_path or "").strip()
+	if not raw:
+		return None, "Set a valid output folder in Asset Exporter (the path is empty)."
 
-	# Get the export path based on the current settings value
-	path = bpy.path.abspath(ae_settings.output_path)
+	# //... is resolved relative to the .blend on disk. Unsaved files have no base, so exports end up in an arbitrary location.
+	if _output_path_is_blend_relative(raw) and not bpy.data.filepath:
+		return None, "Save the .blend file first, or set Output folder to a full path. Paths starting with // are relative to the saved file, so they are not reliable for an unsaved file."
 
-	# Ensure the output folder exists
 	try:
-		# Ensure filepath exists, create it if it doesn't
-		os.makedirs(os.path.dirname(path))
-	except FileExistsError:
-		pass  # The directory already exists, no need to create
+		path	= bpy.path.abspath(raw)
+	except Exception as e:
+		Log(f"AssetExporter: get_export_path_or_error: abspath failed: {e!r}")
+		return None, "Could not resolve the output path. Use a folder under the blend (e.g. //exports/) or a full path to a folder you can write to."
 
-	# Normalise the output path, ensuring correct os.sep is used
-	path = os.path.normpath(path)
+	path	= os.path.normpath(path)
+	if not path:
+		return None, "Set a valid output folder in Asset Exporter."
 
-	return path
+	try:
+		os.makedirs(path, exist_ok=True)
+	except OSError as e:
+		Log(f"AssetExporter: get_export_path_or_error: makedirs failed: {e!r}")
+		return None, "Cannot create or use the output folder. Choose a valid, writable path in Asset Exporter."
+
+	return path, None
 
 
 def read_export_operator_preset(preset: str, file_ext: str) -> tuple[dict | None, str | None]:
@@ -183,12 +200,15 @@ def FindCollectionsWithPrefix(prefix: str) -> dict[str, bpy.types.LayerCollectio
 
 	collections: dict[str, bpy.types.LayerCollection]	= {}
 
+	if not prefix:
+		return collections
+
 	def visit_layer_collection(layer_col: bpy.types.LayerCollection) -> None:
 		for child in layer_col.children:
-			# Check if the collection name contains the prefix and is not excluded
-			if child.name.count(prefix) and not child.exclude:
+			# Match only names that *start* with the prefix; export base name is the remainder (prefix length only)
+			if child.name.startswith(prefix) and not child.exclude:
 				Log("Found collection to export: " + child.name)
-				col_name	= child.name.replace(prefix, "")
+				col_name	= child.name[len(prefix):]
 				collections[col_name]	= child
 			visit_layer_collection(child)
 

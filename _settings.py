@@ -49,7 +49,7 @@ class AssetExporterSettings(bpy.types.PropertyGroup):
 	# String: Output path
 	output_path: bpy.props.StringProperty(
 		name        = "Output folder",
-		description = "Choose the folder to export to",
+		description = "Folder for exported files. // is relative to the .blend (save the file first). Use a full path if the file is not saved",
 		default     = "//",
 		subtype     = 'FILE_PATH'
 	) # type: ignore

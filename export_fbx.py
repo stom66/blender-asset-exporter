@@ -2,8 +2,7 @@ import bpy
 import os
 from xml.etree.ElementTree import tostring
 
-from . collections import FindCollectionsWithPrefix
-from . logging import Log
+from . addon_log import Log
 from . util import *
 
 
@@ -22,8 +21,8 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 	# ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 	#
 	def export_collection_fbx(
-		self, 
-		collection     : bpy.types.Collection, 
+		self,
+		layer_col      : bpy.types.LayerCollection,
 		export_settings: dict,
 		ignore_transforms: bool
 	) -> None:
@@ -31,7 +30,7 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		Export the specified collection to a FBX file with the given export_settings.
 
 		Args:
-		- collection (bpy.types.Collection): The Blender collection containing objects to export.
+		- layer_col (bpy.types.LayerCollection): View layer entry for the collection to export.
 		- export_settings (dict): The table containting all the export settings
 
 		Returns:
@@ -39,18 +38,19 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		"""
 
 		# Get settings
-		settings = bpy.context.scene.ae_settings
+		settings	= bpy.context.scene.ae_settings
+		collection	= layer_col.collection
 
 		# Set the collection as the active collection
-		bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection.children[collection.name]
+		bpy.context.view_layer.active_layer_collection	= layer_col
 
 		# Deselect all the objects
 		bpy.ops.object.select_all(action='DESELECT')
 
 		# Temporarily reset transforms if needed
-		orig_transforms = {}
+		orig_transforms	= {}
 		if ignore_transforms:
-			orig_transforms = apply_identity_transforms(self, collection)
+			orig_transforms	= apply_identity_transforms(self, collection)
 
 		# Do the actual export, with big block of settings
 		bpy.ops.export_scene.fbx(**export_settings)
@@ -68,38 +68,40 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 	# ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝       ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝
 	#                                                                                
 	def export_single_nla_track_fbx(
-		self, 
-		collection       : bpy.types.Collection,
+		self,
+		layer_col        : bpy.types.LayerCollection,
 		armature         : bpy.types.Armature,
 		nla_track        : bpy.types.NlaTrack,
 		export_settings  : dict,
 		ignore_transforms: bool
 	):
+		collection	= layer_col.collection
+
 		# Deselect all objects
 		bpy.ops.object.select_all(action='DESELECT')
 
 		# Temporarily reset transforms if needed
-		orig_transforms = {}
+		orig_transforms	= {}
 		if ignore_transforms:
-			orig_transforms = apply_identity_transforms(self, collection)
+			orig_transforms	= apply_identity_transforms(self, collection)
 
 		# Select the armature and its collection
 		armature.select_set(True)
-		bpy.context.view_layer.objects.active = armature
+		bpy.context.view_layer.objects.active	= armature
 
 		# Record the original states for the tracks
-		orig_track_states = {}
+		orig_track_states	= {}
 
 		# Disable all NLA tracks
 		for key, track in armature.animation_data.nla_tracks.items():
-			orig_track_states[key] = track.mute
-			track.mute = True
+			orig_track_states[key]	= track.mute
+			track.mute	= True
 
 		# Enable only the current NLA track
-		nla_track.mute = False
+		nla_track.mute	= False
 
 		# Set the collection as the active collection
-		bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection.children[collection.name]
+		bpy.context.view_layer.active_layer_collection	= layer_col
 
 		# Deselect all the objects
 		bpy.ops.object.select_all(action='DESELECT')
@@ -173,29 +175,35 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 
 		# Export all the collections
 		files = 0
-		for name, col in collectionsToExport.items():
+		for name, layer_col in collectionsToExport.items():
 
 			# Set the export file name to match the collection name (minus the MATCH_STRING)
-			file_path = str((path + '/' + name + '.fbx'))
-			export_settings["filepath"] = file_path
-			
-            # Run the export
+			file_path	= str((path + '/' + name + '.fbx'))
+			export_settings["filepath"]	= file_path
+
+			# Run the export
 			Log("Exporting as " + name + " to path: " + file_path)
-			self.export_collection_fbx(col, export_settings, settings.fbx_ignore_transform)
+			self.export_collection_fbx(layer_col, export_settings, settings.fbx_ignore_transform)
 			files += 1
-			
-            # If we are splitting NLA tracks, eg exporting a single file per NLA track, then we need to loop through and check for amratures:
+
+			# If we are splitting NLA tracks, eg exporting a single file per NLA track, then we need to loop through and check for amratures:
 			if settings.fbx_split_nla:
 				# Check for armatures with NLA tracks
-				for obj in bpy.data.collections[col.name].all_objects:
+				for obj in bpy.data.collections[layer_col.name].all_objects:
 					if obj.type == 'ARMATURE' and obj.animation_data and obj.animation_data.nla_tracks:
 						for track in obj.animation_data.nla_tracks:
-							
-							file_path = str((path + '/' + name + '.' + track.name + '.fbx'))
-							export_settings["filepath"] = file_path
+
+							file_path	= str((path + '/' + name + '.' + track.name + '.fbx'))
+							export_settings["filepath"]	= file_path
 
 							Log(f"Exporting NLA Track: {track.name} for armature: {obj.name}")
-							self.export_single_nla_track_fbx(col, obj, track, export_settings, settings.fbx_ignore_transform)
+							self.export_single_nla_track_fbx(
+								layer_col,
+								obj,
+								track,
+								export_settings,
+								settings.fbx_ignore_transform
+							)
 							files += 1
 
 

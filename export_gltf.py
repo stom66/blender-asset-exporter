@@ -3,8 +3,7 @@ import os
 import json
 from xml.etree.ElementTree import tostring
 
-from . collections import FindCollectionsWithPrefix
-from . logging import Log
+from . addon_log import Log
 from . util import *
 
 
@@ -25,7 +24,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 	#
 	def export_collection_gltf(
 		self,
-		collection     : bpy.types.Collection, 
+		layer_col      : bpy.types.LayerCollection,
 		export_settings: dict,
 		ignore_transforms: bool
 	) -> None:
@@ -33,7 +32,7 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		Export the specified collection to a GLTF file with the given export_settings.
 
 		Args:
-		- collection (bpy.types.Collection): The Blender collection containing objects to export.
+		- layer_col (bpy.types.LayerCollection): View layer entry for the collection to export.
 		- export_settings (dict): The table containting all the export settings
 		- ignore_transforms (bool): Should objects in the root of the collection will be moved back to 0,0,0 for the export 
 
@@ -42,18 +41,19 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		"""
 
 		# Get settings
-		settings = bpy.context.scene.ae_settings
+		settings		= bpy.context.scene.ae_settings
+		collection	= layer_col.collection
 
 		# Set the collection as the active collection
-		bpy.context.view_layer.active_layer_collection = bpy.context.view_layer.layer_collection.children[collection.name]
+		bpy.context.view_layer.active_layer_collection	= layer_col
 
 		# Deselect all the objects
 		bpy.ops.object.select_all(action='DESELECT')
 
 		# Temporarily reset transforms if needed
-		orig_transforms = {}
+		orig_transforms	= {}
 		if ignore_transforms:
-			orig_transforms = apply_identity_transforms(self, collection)
+			orig_transforms	= apply_identity_transforms(self, collection)
 
 		# Remove the "Smooth by Angle" modifiers if enabled
 		if settings.gltf_remove_modifier_smooth_by_angle:
@@ -124,15 +124,15 @@ class EXPORT_OT_AssetExporter_ExportToGLTF(bpy.types.Operator):
 		ensure_object_mode()
 
 		# Loop through all collections to export
-		for name, col in collectionsToExport.items():
-			
+		for name, layer_col in collectionsToExport.items():
+
 			# Set the export file name to match the collection name (minus the MATCH_STRING)
-			file_path = str((path + '/' + name + '.gltf'))
-			export_settings["filepath"] = file_path
+			file_path	= str((path + '/' + name + '.gltf'))
+			export_settings["filepath"]	= file_path
 
 			# Run the export
 			Log("Exporting as " + name + " to path: " + file_path)
-			self.export_collection_gltf(col, export_settings, settings.gltf_ignore_transform)
+			self.export_collection_gltf(layer_col, export_settings, settings.gltf_ignore_transform)
 
 		self.report({'INFO'}, f"Exported {len(collectionsToExport)} collections")
 		return {'FINISHED'}

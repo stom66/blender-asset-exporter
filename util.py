@@ -1,6 +1,6 @@
 import bpy
 import os
-from . logging import Log
+from . addon_log import Log
 
 def get_export_path() -> str:
 	"""
@@ -177,3 +177,21 @@ def restore_original_transforms(self, orig_transforms: dict):
         obj.location = transform['location']
         obj.rotation_euler = transform['rotation_euler']
         obj.scale = transform['scale']
+
+
+def FindCollectionsWithPrefix(prefix: str) -> dict[str, bpy.types.LayerCollection]:
+
+	collections: dict[str, bpy.types.LayerCollection]	= {}
+
+	def visit_layer_collection(layer_col: bpy.types.LayerCollection) -> None:
+		for child in layer_col.children:
+			# Check if the collection name contains the prefix and is not excluded
+			if child.name.count(prefix) and not child.exclude:
+				Log("Found collection to export: " + child.name)
+				col_name	= child.name.replace(prefix, "")
+				collections[col_name]	= child
+			visit_layer_collection(child)
+
+	visit_layer_collection(bpy.context.view_layer.layer_collection)
+
+	return collections

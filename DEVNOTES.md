@@ -15,6 +15,20 @@ Developed using the following VSCode Extensions:
 * [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 * [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
 
+## Python virtual environment (optional)
+
+The add-on runs inside Blender; a **local venv** is only for **editing** (Pylance, running `py_compile`, etc.). Do not name project files after stdlib modules (for example `logging.py`), or tools like `python -m venv` can break.
+
+**Windows (PowerShell), from the repo root:**
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\activate
+python -m pip install -r requirements-dev.txt
+```
+
+Then point your editor’s Python interpreter at `.venv` and use the **fake-bpy** stubs so `import bpy` resolves for analysis. The real `bpy` module is only available when code runs inside Blender.
+
 ## Dev setup
 
 * Install the recommend extensions via `Ctrl+Shift+P` -> `Extensions: Show Recommended Extensions`

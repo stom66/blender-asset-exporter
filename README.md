@@ -136,6 +136,10 @@ This is usually due to trying to export when in an armatures Pose mode. Switch t
 
     
 
+## Development
+
+If you are working on the plugin in an editor (not only inside Blender), see **[DEVNOTES.md](DEVNOTES.md)** for recommended extensions and optional **Python venv** setup so `bpy` stubs and tooling behave sensibly.
+
 ## ToDo
 
 - [x] Add in option to move objects to world origin during export

@@ -152,10 +152,10 @@ class EXPORT_OT_AssetExporter_ExportToFBX(bpy.types.Operator):
 		
 		# Read in export settings from selected preset
 		if settings.fbx_preset != 'NONE':
-			export_settings = read_export_operator_preset(settings.fbx_preset, "fbx")
-			if not export_settings:
-				self.report({'ERROR'}, f"Preset file not found: {settings.fbx_preset}")
-				Log(f"Preset file not found: {settings.fbx_preset}")
+			export_settings, preset_error = read_export_operator_preset(settings.fbx_preset, "fbx")
+			if preset_error:
+				self.report({'ERROR'}, preset_error)
+				Log(f"read_export_operator_preset: {preset_error}")
 				return {'CANCELLED'}
 
 		else:

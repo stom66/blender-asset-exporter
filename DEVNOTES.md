@@ -1,6 +1,6 @@
 # Dev Notes
 
-## Environment:
+## Environment
 
 Tested under:
 
@@ -15,7 +15,6 @@ Developed using the following VSCode Extensions:
 * [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python)
 * [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
 
-
 ## Dev setup
 
 * Install the recommend extensions via `Ctrl+Shift+P` -> `Extensions: Show Recommended Extensions`
@@ -23,7 +22,6 @@ Developed using the following VSCode Extensions:
 * In VSCode, `Ctrl+Shift+P` -> `Blender: Start`
 * Configure it to start the portable blender we downloaded
 * Edit code, changes are handled by the Blender Development extension
-
 
 ## Releasing new versions
 
@@ -37,17 +35,17 @@ Examples:
 
 ```sh
 # Patch bump (0.2.7 -> 0.2.8): write files only
-python scripts/release_bump.py patch
+python3 scripts/release_bump.py patch
 
 # Minor or major
-python scripts/release_bump.py minor
-python scripts/release_bump.py major
+python3 scripts/release_bump.py minor
+python3 scripts/release_bump.py major
 
 # Exact version
-python scripts/release_bump.py 1.0.0
+python3 scripts/release_bump.py 1.0.0
 
 # Commit, create tag matching the new version, push branch + tag (typical release)
-python scripts/release_bump.py patch --commit --tag --push
+python3 scripts/release_bump.py patch --commit --tag --push
 ```
 
 `--tag` requires `--commit` so the tag points at a commit that includes the version bump.

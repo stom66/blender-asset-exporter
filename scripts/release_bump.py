@@ -38,8 +38,9 @@ def write_manifest_version(version: tuple[int, int, int]) -> None:
 def write_init_version(version: tuple[int, int, int]) -> None:
 	text = INIT_PATH.read_text(encoding="utf-8")
 	replacement = f'"version"    : ({version[0]}, {version[1]}, {version[2]}),'
+	# Include commas after ')' so we replace the whole assignment tail; otherwise an old ',' is left and repeats accumulate (,, ,,, …).
 	text_new = re.sub(
-		r'"version"\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)',
+		r'"version"\s*:\s*\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*\)\s*,*',
 		replacement,
 		text,
 		count=1,

@@ -18,7 +18,7 @@ bl_info = {
 	"name"       : "Asset Exporter",
 	"description": "Quickly export multiple Collections to glTF or FBX",
 	"author"     : "Tom Steventon - stom66",
-	"version"    : (0, 3, 0),
+	"version"    : (0, 3, 1),
 	"blender"    : (4, 1, 0),
 	"location"   : "3D Viewport -> Sidebar -> Asset Exporter",
 	"category"   : "Import-Export",

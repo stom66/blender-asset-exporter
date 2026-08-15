@@ -116,7 +116,7 @@ class VIEW3D_PT_AssetExporter_UI_GLTF(bpy.types.Panel):
 
 # glTF Export Settings
 class VIEW3D_PT_AssetExporter_UI_GLTF_Settings(bpy.types.Panel):
-	bl_label       = 'glTF Expport Settings'
+	bl_label       = 'glTF Export Settings'
 	bl_category    = 'Asset Exporter'
 	bl_region_type = 'UI'
 	bl_space_type  = 'VIEW_3D'
